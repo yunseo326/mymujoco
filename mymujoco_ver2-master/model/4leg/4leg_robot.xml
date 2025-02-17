@@ -1,0 +1,122 @@
+<mujoco model="4leg">
+
+  <!-- <this is default part> -->
+  <asset>
+      <texture builtin="gradient" height="100" rgb1="1 1 1" rgb2="0 0 0" type="skybox" width="100"/>
+      <texture builtin="flat" height="1278" mark="cross" markrgb="1 1 1" name="texgeom" random="0.01" rgb1="0.8 0.6 0.2" rgb2="0.8 0.6 0.2" type="cube" width="127"/>
+      <texture builtin="checker" height="100" name="texplane" rgb1="0 0 0" rgb2="0.8 0.8 0.8" type="2d" width="100"/>
+      <material name="MatPlane" reflectance="0.5" shininess="1" specular="1" texrepeat="60 60" texture="texplane"/>
+      <material name="geom" texture="texgeom" texuniform="true"/>
+  </asset>
+
+
+  <!-- <this is physics part - is very important> -->
+  <compiler angle="radian" coordinate="local" inertiafromgeom="true" />
+
+  <!-- cheetah default  -->
+  <!-- <default>
+      <joint armature=".1" damping=".01" limited="true" solimplimit="0 .8 .03" solreflimit=".02 1" stiffness="8"/>
+      <geom conaffinity="0" condim="3" contype="1" friction=".4 .1 .1" rgba="0.8 0.6 .4 1" solimp="0.0 0.8 0.01" solref="0.02 1"/>
+      <motor ctrllimited="true" ctrlrange="-1 1"/>
+  </default> -->
+
+  <!-- sezeme default -->
+  <default>
+    <joint armature="0.001" limited="true"/>
+    <geom condim="3" density="2.5" margin="0.01" contype="1" conaffinity="1"/>
+  </default>
+
+  <option gravity="0 0 -9.81" />
+  <!-- timestep="0.016" -->
+  <option iterations="50" tolerance="1e-10" solver="Newton" jacobian="dense" cone="pyramidal"/>
+      <option noslip_iterations="3"/>
+
+  <size nconmax="50" njmax="200" nstack="10000"/>
+
+
+  <!-- <this is world body part> -->
+
+  <worldbody>
+    <light cutoff="100" diffuse="1 1 1" dir="-0 0 -1.3" directional="true" exponent="1" pos="0 0 1.3" specular=".1 .1 .1"/>
+    <!-- conaffinity="1"  is cheetah value -->
+    <!-- contype="1" conaffinity="0" is sezeme value  -->
+    <geom conaffinity="1" condim="3" material="MatPlane" name="floor" pos="0 0 0" rgba="0.8 0.9 0.8 1" size="40 40 10" type="plane"/>
+    <!-- world body defult part -->
+
+    <body name="spine" pos="0 0 1" >
+    <camera name="track" mode="trackcom" pos="0 -3 0.3" xyaxes="1 0 0 0 0 1"/>
+      <geom name ="spine" type="box" size="0.75 0.5 0.05"/>
+      <freejoint name="root"/>
+            <geom name ="head" type="box" pos = "0.72 0.2 0" size="0.1 0.1 0.1"/>
+      <!-- <joint armature="0" axis="1 0 0" damping="0" limited="false" name="rootx_p" pos="0 0 0" stiffness="0" type="slide"/>
+      <joint armature="0" axis="0 1 0" damping="0" limited="false" name="rootz_p" pos="0 0 0" stiffness="0" type="slide"/>
+      <joint armature="0" axis="0 0 1" damping="0" limited="false" name="rooty_p" pos="0 0 0" stiffness="0" type="slide"/>
+
+      <joint armature="0" axis="1 0 0" damping="0" limited="false" name="rootx_a" pos="0 0 0" stiffness="0" type="hinge"/>
+      <joint armature="0" axis="0 1 0" damping="0" limited="false" name="rootz_a" pos="0 0 0" stiffness="0" type="hinge"/>
+      <joint armature="0" axis="0 0 1" damping="0" limited="false" name="rooty_a" pos="0 0 0" stiffness="0" type="hinge"/> -->
+      <!-- <site name='tip'  pos='.15 0 .11'/>-->
+
+      <body name="frontrightleg" pos="0.72 0.5 0">
+        <joint  name="frontrightleg1"  pos="0 0.01 0"         damping=".010"    range="-1.571 1.571" type="hinge" axis="0 1 0"/>
+        <geom name="frontrightleg" pos="0.25 0.06 -.25" euler = "0 -0.78539 0" size="0.05 0.05 0.35" type="box"/>
+        <body pos=".5 0.17 -.5">
+          <joint name="frontrightleg2" pos="0 0 0"            damping=".010"    range="-1.571 1.571" type="hinge" axis="0 1 0"/>
+          <geom pos="-0.25 0.01 -.25" euler = "0 0.78539 0" size="0.05 0.05 .4" type="box"/>
+        </body>
+      </body>
+    
+      <body name="frontleftleg" pos="0.72 -0.5 0">
+        <joint  name="frontleftleg1"  pos="0 -0.01 0"         damping=".010"    range="-1.571 1.571" type="hinge" axis="0 1 0"/>
+        <geom name="frontleftleg" pos="0.25 -0.06 -.25" euler = "0 -0.78539 0" size="0.05 0.05 0.35" type="box"/>
+        <body pos=".5 -0.17 -.5">
+          <joint name="frontleftleg2" pos="0 0 0"            damping=".010"    range="-1.571 1.571" type="hinge" axis="0 1 0"/>
+          <geom pos="-0.25 -0.01 -.25" euler = "0 0.78539 0" size="0.05 0.05 .4" type="box"/>
+        </body>
+      </body>
+
+      <body name="backrightleg" pos="-0.72 0.5 0">
+        <joint  name="backrightleg1"  pos="0 0.01 0"         damping=".010"    range="-1.571 1.571" type="hinge" axis="0 1 0"/>
+        <geom pos="-0.25 0.06 -.25" euler = "0 0.78539 0" size="0.05 0.05 0.35" type="box"/>
+        <body pos="-.5 0.17 -.5">
+          <joint name="backrightleg2" pos="0 0 0"            damping=".010"    range="-1.571 1.571" type="hinge" axis="0 1 0"/>
+          <geom pos="0.25 0.01 -.25" euler = "0 -0.78539 0" size="0.05 0.05 .4" type="box"/>
+        </body>
+      </body>
+      
+      <body name="backleftleg" pos="-0.72 -0.5 0">
+        <joint  name="backleftleg1"  pos="0 -0.01 0"         damping=".010"    range="-1.571 1.571" type="hinge" axis="0 1 0"/>
+        <geom name="backleftleg" pos="-0.25 -0.06 -.25" euler = "0 0.78539 0" size="0.05 0.05 0.35" type="box"/>
+        <body pos="-.5 -0.17 -.5">
+          <joint name="backleftleg2" pos="0 0 0"            damping=".010"    range="-1.571 1.571" type="hinge" axis="0 1 0"/>
+          <geom pos="0.25 -0.01 -.25" euler = "0 -0.78539 0" size="0.05 0.05 .4" type="box"/>
+        </body>
+      </body>
+    
+    </body>
+
+  </worldbody>
+
+
+
+
+
+  <!-- <this is actuator part> -->
+
+  <actuator>
+    <!-- 1.571  = 90 degree -->
+      <motor joint="frontrightleg1" ctrlrange ="-0.0001 0" forcelimited="true" forcerange="-1.5 1.5" />
+      <motor joint="frontrightleg2" ctrlrange ="-1.5 1.5" forcelimited="true" forcerange="-1.5 1.5" />
+
+      <motor joint="frontleftleg1" ctrlrange ="-0.0001 0" forcelimited="true" forcerange="-1.5 1.5" />
+      <motor joint="frontleftleg2" ctrlrange ="-1.5 1.5" forcelimited="true" forcerange="-1.5 1.5" />
+
+      <motor joint="backrightleg1" ctrlrange ="-0.0001 0" forcelimited="true" forcerange="-1.5 1.5" />
+      <motor joint="backrightleg2" ctrlrange ="-1.5 1.5" forcelimited="true" forcerange="-1.5 1.5" />
+
+      <motor joint="backleftleg1" ctrlrange ="-0.0001 0" forcelimited="true" forcerange="-1.5 1.5" />
+      <motor joint="backleftleg2" ctrlrange ="-1.5 1.5" forcelimited="true" forcerange="-1.5 1.5" />
+
+  </actuator>
+
+</mujoco>

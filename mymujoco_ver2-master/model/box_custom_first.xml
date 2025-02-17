@@ -1,0 +1,39 @@
+<mujoco model="box_example">
+    <!-- 텍스처와 재질 정의 -->
+    <asset>
+        <texture name="grid" type="2d" builtin="checker" 
+                 rgb1=".1 .2 .3" rgb2=".2 .3 .4" 
+                 width="300" height="300" 
+                 mark="edge" markrgb=".2 .3 .4" />
+        <material name="grid" texture="grid" 
+                  texrepeat="1 1" texuniform="true" reflectance=".2" />
+
+        <!-- 배경 텍스처를 설정 -->
+        <texture name="skybox" type="skybox" builtin="gradient" 
+                 rgb1="1.0 1.0 1.0" rgb2="0.0 0.0 0.0" 
+                 width="512" height="512"/>
+    </asset>
+
+    <visual>
+        <global/>
+        <map/> 
+    </visual>
+
+    <worldbody>
+        <!-- 조명 pos 위치 dir 방향 diffuse 확산광(빛이 고르게 퍼지도록 ) specular 반사광 ambient 주변(주변이 밝아지도록)-->
+        <light name="light1" pos="0 0 100" mode="trackcom" dir="0 0 -1" diffuse="1 1 1" specular="1 1 1" ambient="1 1 1"/>
+
+        <geom type="plane" size="10 10 .5" material="grid"/>
+        <body name="box_body" pos="0 0 1">
+            <joint name="joint1" type="hinge" axis="0 1 0"/>
+            <geom type="sphere" size="0.1 0.1 0.1" rgba = "0.9 0 0.1 1"/>
+        </body>
+    </worldbody>
+    <default>
+        <joint damping="0.1"/>
+    </default>
+
+    <actuator>
+        <motor joint="joint1" ctrlrange="-1 1"/>
+    </actuator>    
+</mujoco>
