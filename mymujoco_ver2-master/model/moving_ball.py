@@ -85,7 +85,7 @@ class Boxenv(MujocoEnv, utils.EzPickle):
         # print(self.data.cfrc_ext[1],)   # mirror torque (저항 고려하여 반작용)
         self.position = np.float32(self.position)
         velocity = np.float32(velocity)
-        self.position = self.position[[0,1,2,7,8]]
+        self.position = self.position[[0,1,2,7,8,9]]
         velocity = velocity[[6,7]]
         """
         qpos

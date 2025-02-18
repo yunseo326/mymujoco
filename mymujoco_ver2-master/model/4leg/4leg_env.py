@@ -26,13 +26,10 @@ class Boxenv(MujocoEnv, utils.EzPickle):
 
         xml_path = os.path.join(os.path.dirname(__file__), "4leg_robot.xml")
 
-        self.single_observation_space = Box(low=-np.inf, high=np.inf, shape=(29,), dtype=np.float32 )
-        self.single_action_space = Box(low=-np.inf, high=np.inf, shape=(8,), dtype=np.float32 )
+        self.single_observation_space = Box(low=-np.inf, high=np.inf, shape=(16,), dtype=np.float32 )
+        self.single_action_space = Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32 )
 
-        self.action_size = 8
-        self.action_low = -1.571 
-        self.action_high = 1.571
-
+        self.action_size = 2
         # Mujoco 환경 초기화
         MujocoEnv.__init__(
             self,
@@ -67,6 +64,7 @@ class Boxenv(MujocoEnv, utils.EzPickle):
         # 포지션과 속도 데이터를 가져옴
         position = self.data.qpos.flat.copy()
         velocity = self.data.qvel.flat.copy()
+        # joint_position = self,find_joint_local()
         position = np.float32(position)
         velocity = np.float32(velocity)
 

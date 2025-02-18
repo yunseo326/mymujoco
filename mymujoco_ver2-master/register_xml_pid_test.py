@@ -28,8 +28,8 @@ class PIDController:
 # Gym 환경 생성 (MuJoCo를 사용한 HalfCheetah 환경 예시)
 env = gym.make('box_example-v2')  # MuJoCo 기반 환경
 obs=env.reset()
-pid_1 = PIDController(kp=2.0, ki=0.1, kd=1)
-pid_2 = PIDController(kp=10.0, ki=0.1, kd=10)
+pid_1 = PIDController(kp=0.7, ki=0.1, kd=.05)
+pid_2 = PIDController(kp=0.7, ki=0.1, kd=.05)
 # approxiamtly servo move value
 dt = 0.01  # Time step in seconds
 prev_ouput_1 = 0
@@ -38,12 +38,14 @@ prev_ouput_2 = 0
 # 100번 반복하면서 렌더링 및 액션 수행
 for i in range(100000):
     env.render()
-    time.sleep(0.01)
+    # time.sleep(0.01)
     # 랜덤한 액션 생성 (범위를 -1 ~ 1로 고정)
     if i <= 100:
-        action = np.array([1, 0.524])  # 0.524  = 30 degree
-    elif i >= 100:
-        action = np.array([1, 1.047])   # 1.047  = 60 degree
+        action = np.array([0, 0])
+    elif i <= 400:
+        action = np.array([ 0.524, 0.524])  # 0.524  = 30 degree
+    elif i >= 400:
+        action = np.array([1.047, 1.047])   # 1.047  = 60 degree
     # elif i <= 300:
     #     action = np.array([1, 1.571])   # 1.571  = 90 degree
 
@@ -53,7 +55,9 @@ for i in range(100000):
     # else:
     #     action = np.random.uniform(-1, 1,env.action_space.shape[0])
     # Example usage
-    measured_value_1 = obs[0][3]
+    print(obs[0][5],1)
+    print(obs[0][4],2)
+    measured_value_1 = obs[0][5]
     measured_value_2 = obs[0][4]
     # print(obs[0][5],obs[0][6])
 
@@ -73,7 +77,7 @@ for i in range(100000):
     # 환경에서 한 스텝 진행
     obs = env.step(action)
 
-    print(obs[0][3:])
+    
     # # 완료 여부 확인 및 초기화
     # if done:
     #     env.reset()

@@ -1,25 +1,26 @@
 """
 observation space 28 = 14*2
+nono 29 
 
-joint 0~13 : joint angle position
+joint 0~14 : joint angle position
 
 0,1,2 : body position x,y,z
-3,4,5 : body angle x,y,z
+3,4,5,6 : body angle x,y,z quernion
 
-6,7 : frontrightleg position
-8,9 : frontleftleg position
-10,11 : backleftleg position
-12,13 : backrightleg position
+7,8 : frontrightleg position
+9,10 : frontleftleg position
+11,12 : backleftleg position
+13,14 : backrightleg position
 
-joint 14~27 : joint velocity
+joint 14~28 : joint velocity
 
-14,15,16 : body position x,y,z velocity
-17,18,19 : body angle x,y,z velocity
+15,16,17 : body position x,y,z velocity
+18,19,20 : body angle x,y,z velocity
 
-20,21 : frontrightleg velocity
-22,23 : frontleftleg velocity
-24,25 : backleftleg velocity
-26,27 : backrightleg velocity
+21,22 : frontrightleg velocity
+23,24 : frontleftleg velocity
+25,26 : backleftleg velocity
+27,28 : backrightleg velocity
 
 
 
@@ -198,21 +199,6 @@ class PIDController:
         return self.output
 
 if __name__ == "__main__":
-    pid_1 = PIDController(kp=10.0, ki=0.1, kd=10)
-    pid_2 = PIDController(kp=10.0, ki=0.1, kd=10)
-    pid_3 = PIDController(kp=10.0, ki=0.1, kd=10)
-    pid_4 = PIDController(kp=10.0, ki=0.1, kd=10)
-    pid_5 = PIDController(kp=10.0, ki=0.1, kd=10)
-    pid_6 = PIDController(kp=10.0, ki=0.1, kd=10)
-    pid_7 = PIDController(kp=10.0, ki=0.1, kd=10)
-    pid_8 = PIDController(kp=10.0, ki=0.1, kd=10)
-    
-
-    #pid_1 = PIDController(kp=2.0, ki=0.1, kd=5)
-    #pid_2 = PIDController(kp=2.0, ki=0.1, kd=5)
-    dt = 0.01  # Time step in seconds
-    episode = 0
-
     from gym.envs.registration import register
     register(id='4leg', entry_point='model.4leg.4leg_env:Boxenv',)
 
@@ -265,8 +251,18 @@ if __name__ == "__main__":
     )
 
     # TRY NOT TO MODIFY: start the game
+    pids = [PIDController(kp=0.7, ki=0.1, kd=.05) for _ in range(envs.action_size)]
+    dt = 0.01  # Time step in seconds
+    episode = 0
     obs,_ = envs.reset(seed=args.seed)
-
+    num=envs.action_size
+    action_list = []
+    measured_value = []
+    output = []
+    for i in range(num):
+        action_list.append(0.5) 
+        measured_value.append(0) 
+        output.append(0) 
     # 여기서부터 학습 관련 코드 시작이라고 보면 됨 위에는 세팅임임
     for global_step in range(args.total_timesteps):
         
@@ -277,7 +273,7 @@ if __name__ == "__main__":
             # actions = np.random.uniform(0, 0,envs.action_space.shape[0])
             # 0 2  45 degree  0.785   4 6 first    -45 degree -0.785 
             # 1 3 -45 degree -0.785   5 7 second    45 degree  0.785
-            actions = np.array([ 0.785, 0.785, 0.785, 0.785, 0.785, 0.785, 0.785, 0.785]) 
+            actions = np.array(action_list) 
             # actions = np.random.uniform(envs.action_space.low , envs.action_space.high ,envs.action_space.shape[0])
             # print(actions)
             # actions = np.random.uniform(envs.action_low,envs.action_high,envs.action_size)
@@ -299,20 +295,11 @@ if __name__ == "__main__":
         # TRY NOT TO MODIFY: execute the game and log data.
 
         # print(actions)
-        # print(obs[3],obs[4])
         ## pid control 
-        measured_value_1 = obs[3]
-        measured_value_2 = obs[4]
-
-        measured_value_3 = obs[5]
-        measured_value_4 = obs[6]
-
-        measured_value_5 = obs[7]
-        measured_value_6 = obs[8]
-
-        measured_value_7 = obs[9]
-        measured_value_8 = obs[10]
-        print(obs[3:11])
+        n=0
+        for i in range(len(action_list)):
+            measured_value[i] = obs[n+i]
+        # print(obs[n:n+8])
         # #normalize
         # actions[0] = (actions[0])
         # actions[1] = (actions[1])
@@ -325,23 +312,13 @@ if __name__ == "__main__":
 
         # actions[6] = (actions[6])
         # actions[7] = (actions[7])
+        for i in range(len(action_list)):
+            output[i] = pids[i].compute(measured_value[i], actions[i],dt)
+        # print(output)
+        # print(output_1,output_2,output_3,output_4,output_5,output_6,output_7,output_8)
+        action_pid = np.array(output)
 
-        output_1 = pid_1.compute(measured_value_1, actions[0],dt)
-        output_2 = pid_2.compute(measured_value_2, actions[1],dt)
-
-        output_3 = pid_3.compute(measured_value_3, actions[2],dt)
-        output_4 = pid_4.compute(measured_value_4, actions[3],dt)
-
-        output_5 = pid_5.compute(measured_value_5, actions[4],dt)
-        output_6 = pid_6.compute(measured_value_6, actions[5],dt)
-
-        output_7 = pid_7.compute(measured_value_7, actions[6],dt)
-        output_8 = pid_8.compute(measured_value_8, actions[7],dt)
-
-        print(output_1,output_2,output_3,output_4,output_5,output_6,output_7,output_8)
-        action_pid = np.array([output_1,output_2,output_3,output_4,output_5,output_6,output_7,output_8])
-
-
+        # print(action_pid)
         next_obs, rewards, done, truncations, infos = envs.step(action_pid)
         # print(next_obs,rewards,terminations,truncations,infos,actions)
         # truncation 과 infos 는 필요없어서 반환값이 false 랑 {}임 필요없음 - 그래도 나중의 수정을 위해 일단 남겨둠

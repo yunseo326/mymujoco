@@ -3,12 +3,16 @@
             
     <default>
         <!-- <joint  damping=".01" limited="true" solimplimit="0 .8 .03" solreflimit=".02 1" stiffness="8"/> -->
-        <joint  damping=".01" stiffness="0.5"/>
-        <geom conaffinity="1" condim="3" contype="1" friction=".4 .1 .1" rgba="0.8 0.6 .4 1" solimp="0.0 0.8 0.01" solref="0.02 1"/>
+        <joint armature="0.001" damping=".01" />
+        <geom density="0.05" conaffinity="1" condim="3" contype="1" friction=".4 .1 .1" rgba="0.8 0.6 .4 1" solimp="0.0 0.8 0.01" solref="0.02 1"/>
         <!-- <motor ctrllimited="true" ctrlrange="-1 1"/> -->
     </default>
+    <option  iterations="50" tolerance="1e-10" solver="Newton" jacobian="dense" cone="pyramidal"/>
+        <option noslip_iterations="3"/>
 
-    <compiler angle="degree" coordinate="local" inertiafromgeom="true" settotalmass="14"/>
+    <size nconmax="50" njmax="200" nstack="10000"/>
+
+    <compiler angle="degree" coordinate="local" inertiafromgeom="true" />
 
     <!-- 텍스처와 재질 정의 -->
     <asset>
@@ -41,20 +45,23 @@
         <body name ="asdf2" pos="0 0 1" euler = "0 0 0">
             <joint name = "joint2"  type="hinge" axis="0 0 1"   />
             <geom name = "box2" type="box" size=".1 .5 .1" rgba = "0.9 0 0.1 1"/>
-            <inertial pos="0 0 0" mass="0.5" diaginertia=".01 .01 .01"/>
+            <body name ="asdf4" pos="0 0 1" euler = "0 0 0">
+                <joint name = "joint3"  type="hinge" axis="0 0 1"   />
+                <geom name = "box4" type="box" size="0.1 0.1 .2" rgba = "0.9 0 0.1 1"/>
+            </body>
         </body>
 
-        <body name ="asdf3" pos=".5 0 1" euler = "0 0 0">
+        <!-- <body name ="asdf3" pos=".5 0 1" euler = "0 0 0">
             <geom name = "box3" type="box" size=".1 .5 .1" rgba = "0.9 0 0.1 1"/>
-        </body>
+        </body> -->
         <!-- but only the header have the free joint then byproducts move along the header-->
         
 
     </worldbody>
 
     <actuator>
-        <motor joint="joint1" ctrlrange = "-5 5"/>
-        <motor joint="joint2" ctrlrange = "-5 5"/>
+        <motor joint="joint3" />
+        <motor joint="joint2" />
     
         <!-- <motor joint="joint1" axis="0 1 0"/> -->
     </actuator>    
