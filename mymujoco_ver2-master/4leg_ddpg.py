@@ -1,26 +1,26 @@
 """
 observation space 28 = 14*2
-nono 29 
 
-joint 0~14 : joint angle position
+joint 0~13 : joint angle position
 
 0,1,2 : body position x,y,z
-3,4,5,6 : body angle x,y,z quernion
+3,4,5 : body angle x,y,z 
 
-7,8 : frontrightleg position
-9,10 : frontleftleg position
-11,12 : backleftleg position
-13,14 : backrightleg position
+6,7 : frontrightleg position
+8,9 : frontleftleg position
+10,11 : backleftleg position
+12,13 : backrightleg position
+
 
 joint 14~28 : joint velocity
 
-15,16,17 : body position x,y,z velocity
-18,19,20 : body angle x,y,z velocity
+14,15,16 : body position x,y,z velocity
+17,18,19 : body angle x,y,z velocity
 
-21,22 : frontrightleg velocity
-23,24 : frontleftleg velocity
-25,26 : backleftleg velocity
-27,28 : backrightleg velocity
+20,21 : frontrightleg velocity
+22,23 : frontleftleg velocity
+24,25 : backleftleg velocity
+26,27 : backrightleg velocity
 
 
 
@@ -30,6 +30,22 @@ action space 8 = 4*2
 2,3 : frontleftleg position
 4,5 : backleftleg position
 6,7 : backrightleg position
+
+
+ 
+needed state   delete number 0,1,2
+
+3,4,5 : body angle x,y,z 
+6,7 : frontrightleg position
+8,9 : frontleftleg position
+10,11 : backleftleg position
+12,13 : backrightleg position
+
+17,18,19 : body angle x,y,z velocity
+20,21 : frontrightleg velocity
+22,23 : frontleftleg velocity
+24,25 : backleftleg velocity
+26,27 : backrightleg velocity
 
 """
 
@@ -51,6 +67,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import tyro
 from stable_baselines3.common.buffers import ReplayBuffer
+from gym.spaces import Box
 
 
 @dataclass
@@ -86,7 +103,7 @@ class Args:
     learning_rate_q: float = 5e-4
     learning_rate_a: float = 1e-4
     """the learning rate of the optimizer"""
-    buffer_size: int = int(1e6)
+    buffer_size: int = 1000000
     """the replay memory buffer size"""
 
     gamma: float = 0.99
@@ -97,7 +114,7 @@ class Args:
     """the batch size of sample from the reply memory"""
     exploration_noise: float = 0.4
     """the scale of exploration noise"""
-    learning_starts: int = 300000
+    learning_starts: int = 3000
     """timestep to start learning"""
     policy_frequency: int = 3000
     """the frequency of training policy (delayed)"""
@@ -121,9 +138,9 @@ def make_env(env_id, capture_video):
 # newral network change 256 256 256 -> 64 128 128
 # ALGO LOGIC: initialize agent here:
 class QNetwork(nn.Module):
-    def __init__(self, env):
+    def __init__(self, envs):
         super().__init__()
-        self.fc1 = nn.Linear(np.array(env.single_observation_space.shape).prod() + env.action_size, 128)
+        self.fc1 = nn.Linear(np.array(envs.single_observation_space.shape).prod() + envs.single_action_space.shape[0], 128)
         self.fc2 = nn.Linear(128, 128)
         self.fc3 = nn.Linear(128, 1)
 
@@ -171,7 +188,7 @@ class OU_noise:
  
     def reset(self):
         # dimension corrected origin (        self.X = np.ones((1, action_size), dtype=np.float32) * mu)
-        self.X = np.ones((envs.action_size), dtype=np.float32) * mu
+        self.X = np.ones((envs.single_action_space.shape[0]), dtype=np.float32) * mu
  
     def sample(self):
         dx = theta * (mu - self.X) + sigma * np.random.randn(len(self.X))
@@ -239,7 +256,6 @@ if __name__ == "__main__":
     q_optimizer = optim.Adam(list(qf1.parameters()), lr=args.learning_rate_q)
     actor_optimizer = optim.Adam(list(actor.parameters()), lr=args.learning_rate_a)
 
-    # envs.single_observation_space.dtype = np.float32
 
     # 버퍼 정의
     rb = ReplayBuffer(
@@ -249,40 +265,31 @@ if __name__ == "__main__":
         device,
         handle_timeout_termination=False,
     )
-
     # TRY NOT TO MODIFY: start the game
-    pids = [PIDController(kp=0.7, ki=0.1, kd=.05) for _ in range(envs.action_size)]
+    pids = [PIDController(kp=0.7, ki=0.1, kd=.05) for _ in range(envs.single_action_space.shape[0])]
     dt = 0.01  # Time step in seconds
     episode = 0
     obs,_ = envs.reset(seed=args.seed)
-    num=envs.action_size
+    num=envs.single_action_space.shape[0]
     action_list = []
     measured_value = []
     output = []
     for i in range(num):
-        action_list.append(0.5) 
+        action_list.append(0) 
         measured_value.append(0) 
         output.append(0) 
+    # 0 2  45 degree  0.785   4 6 first    -45 degree -0.785 
+    # 1 3 -45 degree -0.785   5 7 second    45 degree  0.785
+
+
     # 여기서부터 학습 관련 코드 시작이라고 보면 됨 위에는 세팅임임
     for global_step in range(args.total_timesteps):
-        
-
-
         if global_step < args.learning_starts:  # 탐험을 위해 actor보다는 random에서 값을 가져와서
-            
-            # actions = np.random.uniform(0, 0,envs.action_space.shape[0])
-            # 0 2  45 degree  0.785   4 6 first    -45 degree -0.785 
-            # 1 3 -45 degree -0.785   5 7 second    45 degree  0.785
-            actions = np.array(action_list) 
-            # actions = np.random.uniform(envs.action_space.low , envs.action_space.high ,envs.action_space.shape[0])
-            # print(actions)
-            # actions = np.random.uniform(envs.action_low,envs.action_high,envs.action_size)
-            # print(envs.action_low,envs.action_high,envs.action_size)
+                actions = np.array(envs.single_action_space.sample())
+        
         else:   # action을 actor에서 가져와서
             with torch.no_grad():  
                 actions = actor(torch.Tensor(obs).to(device))
-
-                # normalize noise
                 # 노이즈 추가 평균이 0 이고 표준편차가 뒤에 나온 내용인 정규분포에서 샘플 얻어내기
                 # actor.action_scale 은 중앙값이다 :  action의 범위 최대 - 최소의 절반값 
                 # actions += torch.normal(0, torch.tensor([1.0,1.0])* args.exploration_noise)
@@ -290,37 +297,17 @@ if __name__ == "__main__":
                 # ou noise
                 actions = actions+OU.sample()
                 #clip으로 action의 범위를 벗어나지 않게 해줌
-                actions = actions.cpu().numpy().clip(envs.action_low, envs.action_high)
+                actions = actions.cpu().numpy().clip(envs.single_action_space.low, envs.single_action_space.high)
 
-        # TRY NOT TO MODIFY: execute the game and log data.
 
-        # print(actions)
         ## pid control 
-        n=0
+        n=3
         for i in range(len(action_list)):
             measured_value[i] = obs[n+i]
-        # print(obs[n:n+8])
-        # #normalize
-        # actions[0] = (actions[0])
-        # actions[1] = (actions[1])
-
-        # actions[2] = (actions[2])
-        # actions[3] = (actions[3])
-
-        # actions[4] = (actions[4])
-        # actions[5] = (actions[5])
-
-        # actions[6] = (actions[6])
-        # actions[7] = (actions[7])
-        for i in range(len(action_list)):
             output[i] = pids[i].compute(measured_value[i], actions[i],dt)
-        # print(output)
-        # print(output_1,output_2,output_3,output_4,output_5,output_6,output_7,output_8)
         action_pid = np.array(output)
 
-        # print(action_pid)
-        next_obs, rewards, done, truncations, infos = envs.step(action_pid)
-        # print(next_obs,rewards,terminations,truncations,infos,actions)
+        next_obs, rewards, truncations,done, infos = envs.step(action_pid)
         # truncation 과 infos 는 필요없어서 반환값이 false 랑 {}임 필요없음 - 그래도 나중의 수정을 위해 일단 남겨둠
         # 나중에 필요없다는게 확실시된다면 ,_,_로 처리해버릴것
 
@@ -350,6 +337,8 @@ if __name__ == "__main__":
             self.terminations[self.ptr] = terminated
             self.infos[self.ptr] = info    
         """
+
+
         # 버퍼에 값 넣어주기
         rb.add(obs, next_obs, actions, rewards, done, infos)
 
@@ -359,7 +348,6 @@ if __name__ == "__main__":
         if global_step > args.learning_starts:
             # 버퍼에서 랜덤하게 가져오기
             data = rb.sample(args.batch_size)
-            # print(data)
             # obs 즉 (action, state -> next state 등을 통해)q값 계산
             with torch.no_grad():
                 next_state_actions = target_actor(data.next_observations)
@@ -385,8 +373,10 @@ if __name__ == "__main__":
                     target_param.data.copy_(args.tau * param.data + (1 - args.tau) * target_param.data)
                 for param, target_param in zip(qf1.parameters(), qf1_target.parameters()):
                     target_param.data.copy_(args.tau * param.data + (1 - args.tau) * target_param.data)
+                    
+                if global_step % 1000 == 0:
+                    print(global_step, qf1_loss, actor_loss)
         if done == True:
-            print("reset_ddpg")
             episode +=1
             print(episode)
             obs = envs.reset_model()

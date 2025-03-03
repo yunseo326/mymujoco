@@ -84,6 +84,7 @@ class Boxenv(MujocoEnv, utils.EzPickle):
         # print(self.data.qfrc_smooth[6],self.data.qfrc_constraint[6],1)  # total torque...? (qfrc_smooth == 저항 고려하여 실제로 시뮬레이션에 적용되고 있는 힘)(qfrc_constrain == 반작용)
         # print(self.data.cfrc_ext[1],)   # mirror torque (저항 고려하여 반작용)
         self.position = np.float32(self.position)
+        print(self.position)
         velocity = np.float32(velocity)
         self.position = self.position[[0,1,2,7,8,9]]
         velocity = velocity[[6,7]]

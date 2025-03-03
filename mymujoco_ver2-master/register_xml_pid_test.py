@@ -43,9 +43,9 @@ for i in range(100000):
     if i <= 100:
         action = np.array([0, 0])
     elif i <= 400:
-        action = np.array([ 0.524, 0.524])  # 0.524  = 30 degree
+        action = np.array([ 0.524, 0])  # 0.524  = 30 degree
     elif i >= 400:
-        action = np.array([1.047, 1.047])   # 1.047  = 60 degree
+        action = np.array([1.047, 0])   # 1.047  = 60 degree
     # elif i <= 300:
     #     action = np.array([1, 1.571])   # 1.571  = 90 degree
 
@@ -76,7 +76,6 @@ for i in range(100000):
     # action = [random.uniform(-1, 1) for _ in range(env.action_space.shape[0])]
     # 환경에서 한 스텝 진행
     obs = env.step(action)
-
     
     # # 완료 여부 확인 및 초기화
     # if done:
