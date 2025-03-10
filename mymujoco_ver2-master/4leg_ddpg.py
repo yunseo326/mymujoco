@@ -72,7 +72,7 @@ from gym.spaces import Box
 
 @dataclass
 class Args:
-    exp_name: str = os.path.join(os.path.dirname(__file__), "ball_test.xml")
+    exp_name: str = os.path.join(os.path.dirname(__file__), "4leg.xml")
     """the name of this experiment"""
     seed: int = 1
     """seed of the experiment"""
@@ -116,7 +116,7 @@ class Args:
     """the scale of exploration noise"""
     learning_starts: int = 3000
     """timestep to start learning"""
-    policy_frequency: int = 3000
+    policy_frequency: int = 2
     """the frequency of training policy (delayed)"""
     noise_clip: float = 0.7
     """noise clip parameter of the Target Policy Smoothing Regularization"""
@@ -373,18 +373,25 @@ if __name__ == "__main__":
                     target_param.data.copy_(args.tau * param.data + (1 - args.tau) * target_param.data)
                 for param, target_param in zip(qf1.parameters(), qf1_target.parameters()):
                     target_param.data.copy_(args.tau * param.data + (1 - args.tau) * target_param.data)
-                    
+
                 if global_step % 1000 == 0:
-                    print(global_step, qf1_loss, actor_loss)
+                    run_name = 'robot'
+                    model_path = f"runs/{run_name}/{args.exp_name}.cleanrl_model"
+                    torch.save((actor.state_dict(), qf1.state_dict()), model_path)
+                        
+                    print(f"Step: {global_step}, QF1 Loss: {qf1_loss.item():.4f}, Actor Loss: {actor_loss.item():.4f}, model saved to {model_path}")
+
         if done == True:
             episode +=1
             print(episode)
             obs = envs.reset_model()
+    """
     # 저장하는 부분
     if args.save_model:
         run_name = 'robot'
         model_path = f"runs/{run_name}/{args.exp_name}.cleanrl_model"
         torch.save((actor.state_dict(), qf1.state_dict()), model_path)
         print(f"model saved to {model_path}")
-        
+    """
+
     envs.close()

@@ -13,7 +13,7 @@
           
   <default>
       <joint armature="0.001" damping=".01" />
-      <geom density="1.5" conaffinity="1" condim="3" contype="1" friction=".1 .1 .1" rgba="0.8 0.6 .4 1" solimp="0.01 0.2 0.01" solref="0.02 1"/>
+      <geom density="1.5" conaffinity="1" condim="3" contype="1" friction=".5 .5 .5" rgba="0.8 0.6 .4 1" solimp="0.9 0.95 0.001" solref="0.02 1"/>
   </default>
   <option gravity="0 0 -9.81" iterations="50" tolerance="1e-10" solver="Newton" jacobian="dense" cone="pyramidal" noslip_iterations="3" />
   <size nconmax="50" njmax="200" nstack="10000"/>
@@ -29,7 +29,7 @@
     <body name="spine" pos="0 0 1" >
     <camera name="track" mode="trackcom" pos="0 -3 0.3" xyaxes="1 0 0 0 0 1"/>
       <geom name ="spine" type="box" size="0.75 0.5 0.05"/>
-      <geom name ="body" type="box" pos = "0 0 0.1" size="0.6 0.4 0.1"/>
+      <!-- <geom name ="body" type="box" pos = "0 0 0.1" size="0.6 0.4 0.1"/> -->
       <joint name="pos_x"  pos="0 0 0" type="slide" axis="1 0 0"/>
       <joint name="pos_y"  pos="0 0 0" type="slide" axis="0 1 0"/>
       <joint name="pos_z"  pos="0 0 0" type="slide" axis="0 0 1"/>

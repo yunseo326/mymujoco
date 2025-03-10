@@ -84,13 +84,22 @@ class Boxenv(MujocoEnv, utils.EzPickle):
     
 
     def _get_reward(self,forward_reward,ctrl_cost,x_axis,y_axis,height_z):
-        reward = forward_reward #- ctrl_cost
-        if abs(height_z) > 0.5:
-            reward -= abs(height_z)*0.01
+        
+        # 2. 
+        if abs(height_z) < 0.15 and abs(x_axis) < 0.6 and abs(y_axis) < 0.6:
+            # health reward 
+            reward = forward_reward #- ctrl_cost
+        else:
+            # unhealth reward  maximum 1.5 = 0.6 + 0.6 + 0.3
+            reward = -abs(height_z) -abs(x_axis) -abs(y_axis)
+
         done = False
+
+        #1. failure 
         if x_axis < -1 or x_axis > 1 or y_axis < -1 or y_axis > 1:
             done = True
             reward = -3
+
         reward = np.float32(reward)
         return reward, done
     
